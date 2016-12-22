@@ -8,6 +8,9 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +19,6 @@ import java.util.regex.Pattern;
 
 
 public class WatSession {
-    final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
     private CookieStore cookie_store;
     private Cookie verification_cookie;
     private String verification_token;
@@ -27,29 +29,21 @@ public class WatSession {
 
 
     private void initializeSession() {
-        final String REGEX_TOKEN = "<input name=\"__RequestVerificationToken\" type=\"hidden\" value=\"(.*?)\" \\/>";
+        final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
+
         cookie_store = new BasicCookieStore();
         HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookie_store).build();
         HttpGet get = new HttpGet(LOGIN_URL);
 
         try {
             HttpResponse response = client.execute(get);
-            List<Cookie> cookies = cookie_store.getCookies();
-            for (Cookie c: cookies) {
-                if (c.getName().contains("RequestVerificationToken"))
-                    setVerificationCookie(c);
-                System.err.println("Cookie: " + c.getName() + "\nValue: " + c.getValue());
-            }
+            String html_response = new BasicResponseHandler().handleResponse(response);
+            Document doc = Jsoup.parse(html_response);
 
-            System.out.println("Initialize Session Response Code: " + response.getStatusLine().getStatusCode());
-            String result = new BasicResponseHandler().handleResponse(response);
-            Pattern p = Pattern.compile(REGEX_TOKEN);
-            Matcher m = p.matcher(result);
-
-            // TODO: Use Jsoup instead of Regex
-            while (m.find()) {
-                setVerificationToken(m.group(1));
-            }
+            String requestVerificationToken = doc.select("input[name=__RequestVerificationToken]").get(0).val();
+            setVerificationToken(requestVerificationToken);
+            // Should only be one cookie in request
+            setVerificationCookie(cookie_store.getCookies().get(0));
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -62,7 +56,6 @@ public class WatSession {
     public void setVerificationCookie(Cookie verification_cookie) {
         this.verification_cookie = verification_cookie;
     }
-
     public String getVerificationToken() {
         return verification_token;
     }

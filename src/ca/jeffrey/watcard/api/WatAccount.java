@@ -19,9 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by Jeffrey on 2016-12-19.
- */
 public class WatAccount {
     private WatSession session;
     private String account;
@@ -42,22 +39,26 @@ public class WatAccount {
         this.account = account;
         this.password = password.toCharArray();
         balances = new ArrayList<>();
-
+        name = birth_date = marital_status = sex = email = phone = mobile = address = "";
     }
 
     public void newSession() {
         session = new WatSession();
     }
 
-    public int login() {
+    public List<WatBalance> getBalances() {
+        return balances;
+    }
 
+    public int login() {
         final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
         int code = -1;
 
+        // Set cookie store
         HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
         HttpPost post = new HttpPost(LOGIN_URL);
 
-
+        // Parameters to send
         List<NameValuePair> urlParameters = new ArrayList<>();
         urlParameters.add(new BasicNameValuePair("__RequestVerificationToken", session.getVerificationToken()));
         urlParameters.add(new BasicNameValuePair("AccountMode", "0"));
@@ -75,10 +76,7 @@ public class WatAccount {
         return code;
     }
 
-    public List<WatBalance> getBalances() {
-        return balances;
-    }
-
+    // Retrieve balance data and store in balances list
     public void loadBalances() {
         final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Financial/Balances";
         balances = new ArrayList<>();
@@ -98,6 +96,7 @@ public class WatAccount {
                 Elements info = balance.select("td");
                 String id = info.get(0).text();
                 String name = info.get(1).text();
+                // Remove $ sign
                 double limit = Double.parseDouble(info.get(2).text().replace("$", ""));
                 double value = Double.parseDouble(info.get(3).text().replace("$", ""));
 
@@ -125,12 +124,12 @@ public class WatAccount {
             Elements info = doc.getElementsByClass("ow-info-container").first()
                     .select("span.ow-value");
 
-            name = info.get(0).text().replaceAll("\\.", "");
+            name = info.get(0).text().replaceAll("\\.", ""); // Remove unwanted period character
             birth_date = info.get(2).text();
             marital_status = info.get(3).text();
             sex = info.get(4).text();
             email = info.get(5).text();
-            phone = info.get(6).text().replaceAll("[-().\\s]", "");
+            phone = info.get(6).text().replaceAll("[-().\\s]", ""); // Remove all formatting
             mobile =  info.get(7).text().replaceAll("[-().\\s]", "");
             address =  info.get(8).text();
         }
@@ -139,6 +138,7 @@ public class WatAccount {
         }
     }
 
+    // Clear, formatted output of data
     public void displayBalances() {
         if (balances != null) {
             for (WatBalance b: balances) {
@@ -148,7 +148,7 @@ public class WatAccount {
     }
 
     public void displayPersonalInfo() {
-        System.out.printf("Name: %s%nBirthdate: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
+        System.out.printf("Name: %s%nBirth date: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
                 "Mobile: %s%nAddress: %s%n", name, birth_date, marital_status, sex, email, phone, mobile, address);
     }
 }
