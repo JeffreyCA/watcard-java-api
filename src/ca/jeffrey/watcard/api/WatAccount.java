@@ -28,10 +28,21 @@ public class WatAccount {
     private char[] password;
     private List<WatBalance> balances;
 
+    private String name;
+    private String birth_date;
+    private String marital_status;
+    private String sex;
+    private String email;
+    private String phone;
+    private String mobile;
+    private String address;
+
     public WatAccount(WatSession session, String account, String password) {
         this.session = session;
         this.account = account;
         this.password = password.toCharArray();
+        balances = new ArrayList<>();
+
     }
 
     public void newSession() {
@@ -80,17 +91,15 @@ public class WatAccount {
             String html_response = new BasicResponseHandler().handleResponse(response);
 
             Document doc = Jsoup.parse(html_response);
-            Element content = doc.getElementsByClass("col-md-9").first();
-            Elements rows = content.select("tbody");
+            Elements accounts = doc.getElementsByClass("table table-striped ow-table-responsive").first()
+                    .select("tbody").first().select("tr");
 
-
-            for (Element row: rows) {
-                Elements columns = row.select("td");
-
-                int id = Integer.parseInt(columns.get(0).text());
-                String name = columns.get(1).text();
-                double limit = Double.parseDouble(columns.get(2).text().replace("$", ""));
-                double value = Double.parseDouble(columns.get(3).text().replace("$", ""));
+            for (Element balance: accounts) {
+                Elements info = balance.select("td");
+                String id = info.get(0).text();
+                String name = info.get(1).text();
+                double limit = Double.parseDouble(info.get(2).text().replace("$", ""));
+                double value = Double.parseDouble(info.get(3).text().replace("$", ""));
 
                 balances.add(new WatBalance(id, name, limit, value));
             }
@@ -98,5 +107,48 @@ public class WatAccount {
         catch (IOException ie) {
             ie.printStackTrace();
         }
+    }
+
+    // TODO: Cache html response
+    public void loadPersonalInfo() {
+        final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/Personal";
+        balances = new ArrayList<>();
+
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(BALANCE_URL);
+
+        try {
+            HttpResponse response = client.execute(get);
+            String html_response = new BasicResponseHandler().handleResponse(response);
+
+            Document doc = Jsoup.parse(html_response);
+            Elements info = doc.getElementsByClass("ow-info-container").first()
+                    .select("span.ow-value");
+
+            name = info.get(0).text().replaceAll("\\.", "");
+            birth_date = info.get(2).text();
+            marital_status = info.get(3).text();
+            sex = info.get(4).text();
+            email = info.get(5).text();
+            phone = info.get(6).text().replaceAll("[-().\\s]", "");
+            mobile =  info.get(7).text().replaceAll("[-().\\s]", "");
+            address =  info.get(8).text();
+        }
+        catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    public void displayBalances() {
+        if (balances != null) {
+            for (WatBalance b: balances) {
+                System.out.printf("%s %s: $%.2f%n", b.getId(), b.getName(), b.getValue());
+            }
+        }
+    }
+
+    public void displayPersonalInfo() {
+        System.out.printf("Name: %s%nBirthdate: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
+                "Mobile: %s%nAddress: %s%n", name, birth_date, marital_status, sex, email, phone, mobile, address);
     }
 }

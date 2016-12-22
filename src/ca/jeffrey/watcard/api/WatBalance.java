@@ -5,23 +5,23 @@ package ca.jeffrey.watcard.api;
  */
 public class WatBalance {
 
-    private int id;
+    private String id;
     private String name;
     private double limit;
     private double value;
 
-    public WatBalance(int id, String name, double limit, double value) {
+    public WatBalance(String id, String name, double limit, double value) {
         this.id = id;
         this.name = name;
         this.limit = limit;
         this.value = value;
     }
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
     public String getName() {
