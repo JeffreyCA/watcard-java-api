@@ -15,6 +15,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +26,7 @@ public class WatAccount {
     private String account;
     private char[] password;
     private List<WatBalance> balances;
-
+    // private List<WatTransaction> transactions;
     private String name;
     private String birth_date;
     private String marital_status;
@@ -39,6 +41,7 @@ public class WatAccount {
         this.account = account;
         this.password = password.toCharArray();
         balances = new ArrayList<>();
+        // transactions = new ArrayList<>();
         name = birth_date = marital_status = sex = email = phone = mobile = address = "";
     }
 
@@ -69,8 +72,7 @@ public class WatAccount {
             post.setEntity(new UrlEncodedFormEntity(urlParameters));
             HttpResponse response = client.execute(post);
             code = response.getStatusLine().getStatusCode();
-        }
-        catch (IOException ie) {
+        } catch (IOException ie) {
             ie.printStackTrace();
         }
         return code;
@@ -92,7 +94,7 @@ public class WatAccount {
             Elements accounts = doc.getElementsByClass("table table-striped ow-table-responsive").first()
                     .select("tbody").first().select("tr");
 
-            for (Element balance: accounts) {
+            for (Element balance : accounts) {
                 Elements info = balance.select("td");
                 String id = info.get(0).text();
                 String name = info.get(1).text();
@@ -102,8 +104,7 @@ public class WatAccount {
 
                 balances.add(new WatBalance(id, name, limit, value));
             }
-        }
-        catch (IOException ie) {
+        } catch (IOException ie) {
             ie.printStackTrace();
         }
     }
@@ -130,10 +131,9 @@ public class WatAccount {
             sex = info.get(4).text();
             email = info.get(5).text();
             phone = info.get(6).text().replaceAll("[-().\\s]", ""); // Remove all formatting
-            mobile =  info.get(7).text().replaceAll("[-().\\s]", "");
-            address =  info.get(8).text();
-        }
-        catch (IOException ie) {
+            mobile = info.get(7).text().replaceAll("[-().\\s]", "");
+            address = info.get(8).text();
+        } catch (IOException ie) {
             ie.printStackTrace();
         }
     }
@@ -141,8 +141,8 @@ public class WatAccount {
     // Clear, formatted output of data
     public void displayBalances() {
         if (balances != null) {
-            for (WatBalance b: balances) {
-                System.out.printf("%s %s: $%.2f%n", b.getId(), b.getName(), b.getValue());
+            for (WatBalance b : balances) {
+                System.out.println(b);
             }
         }
     }
@@ -150,5 +150,79 @@ public class WatAccount {
     public void displayPersonalInfo() {
         System.out.printf("Name: %s%nBirth date: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
                 "Mobile: %s%nAddress: %s%n", name, birth_date, marital_status, sex, email, phone, mobile, address);
+    }
+
+    public List<WatTransaction> getTransactions(String url) {
+        final DateTimeFormatter RESPONSE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy h:mm:ss a");
+
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(url);
+
+        try {
+            HttpResponse response = client.execute(get);
+            String html_response = new BasicResponseHandler().handleResponse(response);
+
+            if (html_response.contains("No transactions found!"))
+                return null;
+            else {
+                List<WatTransaction> transactions = new ArrayList<>();
+                Document doc = Jsoup.parse(html_response);
+                Elements info = doc.getElementsByClass("table table-striped ow-table-responsive").first()
+                        .select("tbody").first().select("tr");
+
+                for (Element e : info) {
+                    Elements data = e.select("td");
+                    LocalDateTime date_time = LocalDateTime.parse(data.get(0).text(), RESPONSE_FORMAT);
+                    double amount = Double.valueOf(data.get(1).text().replace("$", ""));
+                    String account = data.get(2).text();
+                    int unit = Integer.valueOf(data.get(3).text());
+                    String type = data.get(4).text();
+                    String terminal = data.get(5).text();
+
+                    transactions.add(new WatTransaction(date_time, amount, account, unit, type, terminal));
+                }
+                return transactions;
+            }
+
+        } catch (IOException ie) {
+            ie.printStackTrace();
+            return null;
+        }
+    }
+
+    public List<WatTransaction> getTransactions(LocalDateTime begin) {
+        String formatted_begin = WatTransaction.DATE_FORMAT.format(begin);
+        String formatted_today = WatTransaction.DATE_FORMAT.format(LocalDateTime.now());
+        String url = WatTransaction.BASE_URL + String.format("?dateFrom=%s&dateTo=%s&returnRows=0",
+                formatted_begin, formatted_today);
+
+        return getTransactions(url);
+    }
+
+    public List<WatTransaction> getTransactions(LocalDateTime begin, int quantity) {
+        String formatted_begin = WatTransaction.DATE_FORMAT.format(begin);
+        String formatted_today = WatTransaction.DATE_FORMAT.format(LocalDateTime.now());
+        String url = WatTransaction.BASE_URL + String.format("?dateFrom=%s&dateTo=%s&returnRows=%d",
+                formatted_begin, formatted_today, quantity);
+
+        return getTransactions(url);
+    }
+
+    public List<WatTransaction> getTransactions(LocalDateTime begin, LocalDateTime end) {
+        String formatted_begin = WatTransaction.DATE_FORMAT.format(begin);
+        String formatted_end = WatTransaction.DATE_FORMAT.format(end);
+        String url = WatTransaction.BASE_URL + String.format("?dateFrom=%s&dateTo=%s&returnRows=0",
+                formatted_begin, formatted_end);
+
+        return getTransactions(url);
+    }
+
+    public List<WatTransaction> getTransactions(LocalDateTime begin, LocalDateTime end, int quantity) {
+        String formatted_begin = WatTransaction.DATE_FORMAT.format(begin);
+        String formatted_end = WatTransaction.DATE_FORMAT.format(end);
+        String url = WatTransaction.BASE_URL + String.format("?dateFrom=%s&dateTo=%s&returnRows=%d",
+                formatted_begin, formatted_end, quantity);
+
+        return getTransactions(url);
     }
 }
