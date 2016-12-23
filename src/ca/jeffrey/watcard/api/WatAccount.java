@@ -24,6 +24,9 @@ import java.util.List;
 
 public class WatAccount {
 
+    // Number of balance types
+    private final int BALANCE_TYPES = 12;
+
     // Main fields
     private WatSession session;
     private String account;
@@ -326,11 +329,11 @@ public class WatAccount {
         String formattedEnd;
 
         if (exact) {
-            formattedBegin = WatTransaction.DATE_FORMAT.format(LocalDateTime.now().minusDays(30));
+            formattedBegin = WatTransaction.DATE_FORMAT.format(LocalDateTime.now().minusDays(days));
             formattedEnd = WatTransaction.DATE_FORMAT.format(LocalDateTime.now());
         }
         else {
-            formattedBegin = WatTransaction.DATE_FORMAT.format(LocalDateTime.now().minusDays(30).
+            formattedBegin = WatTransaction.DATE_FORMAT.format(LocalDateTime.now().minusDays(days).
                     truncatedTo(ChronoUnit.DAYS));
             formattedEnd = WatTransaction.DATE_FORMAT.format(LocalDateTime.now());
         }
@@ -344,7 +347,7 @@ public class WatAccount {
     public WatBalance getWatBalance(WatBalanceType type) {
         WatBalance balance = null;
 
-        if (balances.size() == 12) {
+        if (balances.size() == BALANCE_TYPES) {
             switch (type) {
                 case VILLAGE_MEAL:
                     balance = balances.get(0);
@@ -402,7 +405,7 @@ public class WatAccount {
     public double getFlexBalance() {
         double balance = 0;
 
-        if (balances.size() == 12) {
+        if (balances.size() == BALANCE_TYPES) {
             balance = getWatBalance(WatBalanceType.FLEX1).getValue() +
                     getWatBalance(WatBalanceType.FLEX2).getValue() +
                     getWatBalance(WatBalanceType.FLEX3).getValue();
@@ -413,7 +416,7 @@ public class WatAccount {
     public double getMealBalance() {
         double balance = 0;
 
-        if (balances.size() == 12) {
+        if (balances.size() == BALANCE_TYPES) {
             balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
                     getWatBalance(WatBalanceType.BEST_BUY_MEAL).getValue() +
                     getWatBalance(WatBalanceType.FOOD_PLAN).getValue();
