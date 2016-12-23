@@ -12,10 +12,10 @@ public class WatBalance {
     /**
      * Constructor
      *
-     * @param id account ID
-     * @param name name of account
-     * @param limit limit of account
-     * @param value existing account balance
+     * @param id balance name
+     * @param name balance type
+     * @param limit limit of balance type
+     * @param value balance
      */
     public WatBalance(String id, String name, double limit, double value) {
         this.id = id;

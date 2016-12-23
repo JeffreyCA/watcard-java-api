@@ -341,6 +341,86 @@ public class WatAccount {
         return getTransactions(url);
     }
 
+    public WatBalance getWatBalance(WatBalanceType type) {
+        WatBalance balance = null;
+
+        if (balances.size() == 12) {
+            switch (type) {
+                case VILLAGE_MEAL:
+                    balance = balances.get(0);
+                    break;
+                case BEST_BUY_MEAL:
+                    balance = balances.get(1);
+                    break;
+                case FOOD_PLAN:
+                    balance = balances.get(2);
+                    break;
+                case FLEX1:
+                    balance = balances.get(3);
+                    break;
+                case FLEX2:
+                    balance = balances.get(4);
+                    break;
+                case FLEX3:
+                    balance = balances.get(5);
+                    break;
+                case TRANSFER:
+                    balance = balances.get(6);
+                    break;
+                case DON_MEAL:
+                    balance = balances.get(7);
+                    break;
+                case DON_FLEX:
+                    balance = balances.get(8);
+                    break;
+                case REWARDS:
+                    balance = balances.get(9);
+                    break;
+                case DEPT_CHARGE:
+                    balance = balances.get(10);
+                    break;
+                case OVERDRAFT:
+                    balance = balances.get(11);
+                    break;
+            }
+        }
+        return balance;
+    }
+
+    public double getWatBalanceValue(WatBalanceType type) {
+        WatBalance balance = getWatBalance(type);
+
+        if (balance == null) {
+            return 0;
+        }
+        else {
+            return balance.getValue();
+        }
+    }
+
+    // Getters for two most popular balance types
+    public double getFlexBalance() {
+        double balance = 0;
+
+        if (balances.size() == 12) {
+            balance = getWatBalance(WatBalanceType.FLEX1).getValue() +
+                    getWatBalance(WatBalanceType.FLEX2).getValue() +
+                    getWatBalance(WatBalanceType.FLEX3).getValue();
+        }
+        return balance;
+    }
+
+    public double getMealBalance() {
+        double balance = 0;
+
+        if (balances.size() == 12) {
+            balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.BEST_BUY_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.FOOD_PLAN).getValue();
+        }
+        return balance;
+    }
+
     // Getters and setters
     public WatSession getSession() {
         return session;
