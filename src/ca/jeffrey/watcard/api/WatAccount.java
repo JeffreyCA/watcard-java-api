@@ -59,6 +59,13 @@ public class WatAccount {
     }
 
     /**
+     * Load new WatSession.
+     */
+    public void newSession() {
+        session = new WatSession();
+    }
+
+    /**
      * Logs user into WatCard site by initiating a POST request containing a {@code __RequestVerificationToken} and user
      * account details. Uses a {@code WatSession} to store cookies and verification token.
      *
@@ -90,6 +97,48 @@ public class WatAccount {
             ie.printStackTrace();
         }
         return code;
+    }
+
+    /**
+     * Retrieves user's account information stores it in {@code WatAccount} fields.
+     */
+    public void loadPersonalInfo() {
+        // Request URL
+        final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/Personal";
+
+        // Use session's cookie store
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(BALANCE_URL);
+
+        try {
+            // Perform request
+            HttpResponse response = client.execute(get);
+            String htmlResponse = new BasicResponseHandler().handleResponse(response);
+            Document doc = Jsoup.parse(htmlResponse);
+            Elements info = doc.getElementsByClass("ow-info-container").first()
+                    .select("span.ow-value");
+
+            // Store selected data in corresponding fields
+            name = info.get(0).text().replaceAll("\\.", ""); // Remove unwanted period character
+            birthDate = info.get(2).text();
+            maritalStatus = info.get(3).text();
+            sex = info.get(4).text();
+            email = info.get(5).text();
+            phone = info.get(6).text().replaceAll("[-().\\s]", ""); // Remove all formatting
+            mobile = info.get(7).text().replaceAll("[-().\\s]", "");
+            address = info.get(8).text();
+        }
+        catch (IOException ie) {
+            ie.printStackTrace();
+        }
+    }
+
+    /**
+     * Outputs account information.
+     */
+    public void displayPersonalInfo() {
+        System.out.printf("Name: %s%nBirth date: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
+                "Mobile: %s%nAddress: %s%n", name, birthDate, maritalStatus, sex, email, phone, mobile, address);
     }
 
     /**
@@ -130,42 +179,6 @@ public class WatAccount {
             ie.printStackTrace();
         }
     }
-    // TODO: get specific balances
-
-
-    /**
-     * Retrieves user's account information stores it in {@code WatAccount} fields.
-     */
-    public void loadPersonalInfo() {
-        // Request URL
-        final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/Personal";
-
-        // Use session's cookie store
-        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
-        HttpGet get = new HttpGet(BALANCE_URL);
-
-        try {
-            // Perform request
-            HttpResponse response = client.execute(get);
-            String htmlResponse = new BasicResponseHandler().handleResponse(response);
-            Document doc = Jsoup.parse(htmlResponse);
-            Elements info = doc.getElementsByClass("ow-info-container").first()
-                    .select("span.ow-value");
-
-            // Store selected data in corresponding fields
-            name = info.get(0).text().replaceAll("\\.", ""); // Remove unwanted period character
-            birthDate = info.get(2).text();
-            maritalStatus = info.get(3).text();
-            sex = info.get(4).text();
-            email = info.get(5).text();
-            phone = info.get(6).text().replaceAll("[-().\\s]", ""); // Remove all formatting
-            mobile = info.get(7).text().replaceAll("[-().\\s]", "");
-            address = info.get(8).text();
-        }
-        catch (IOException ie) {
-            ie.printStackTrace();
-        }
-    }
 
     /**
      * Outputs balances.
@@ -177,27 +190,111 @@ public class WatAccount {
     }
 
     /**
-     * Outputs account information.
-     */
-    public void displayPersonalInfo() {
-        System.out.printf("Name: %s%nBirth date: %s%nMarital Status: %s%nSex: %s%nEmail: %s%nPhone: %s%n" +
-                "Mobile: %s%nAddress: %s%n", name, birthDate, maritalStatus, sex, email, phone, mobile, address);
-    }
-
-    /**
-     * Load new WatSession.
-     */
-    public void newSession() {
-        session = new WatSession();
-    }
-
-    /**
      * Get account balances
      *
      * @return list of WatBalance
      */
     public List<WatBalance> getBalances() {
         return balances;
+    }
+
+    /**
+     * Returns a {@code WatBalance} of the given balance type. If the balances were not properly loaded, it returns null.
+     * @param type balance type
+     * @return {@code WatBalance} of {@code type}
+     */
+    public WatBalance getWatBalance(WatBalanceType type) {
+        WatBalance balance = null;
+
+        if (balances.size() == BALANCE_TYPES) {
+            switch (type) {
+                case VILLAGE_MEAL:
+                    balance = balances.get(0);
+                    break;
+                case BEST_BUY_MEAL:
+                    balance = balances.get(1);
+                    break;
+                case FOOD_PLAN:
+                    balance = balances.get(2);
+                    break;
+                case FLEX1:
+                    balance = balances.get(3);
+                    break;
+                case FLEX2:
+                    balance = balances.get(4);
+                    break;
+                case FLEX3:
+                    balance = balances.get(5);
+                    break;
+                case TRANSFER:
+                    balance = balances.get(6);
+                    break;
+                case DON_MEAL:
+                    balance = balances.get(7);
+                    break;
+                case DON_FLEX:
+                    balance = balances.get(8);
+                    break;
+                case REWARDS:
+                    balance = balances.get(9);
+                    break;
+                case DEPT_CHARGE:
+                    balance = balances.get(10);
+                    break;
+                case OVERDRAFT:
+                    balance = balances.get(11);
+                    break;
+            }
+        }
+        return balance;
+    }
+
+    /**
+     * Returns the amount of funds in the given balance type. If {@code balances} was not properly loaded, it returns 0.
+     * @param type balance type
+     * @return amount in the {@code type} balance
+     */
+    public double getWatBalanceValue(WatBalanceType type) {
+        WatBalance balance = getWatBalance(type);
+
+        if (balance == null) {
+            return 0;
+        }
+        else {
+            return balance.getValue();
+        }
+    }
+
+    /**
+     * Returns amount of Flex Dollars in account by adding up all three Flex accounts. If {@code balances} was not
+     * properly loaded, it returns 0.
+     *
+     * @return amount of Flex Dollars
+     */
+    public double getFlexBalance() {
+        double balance = 0;
+
+        if (balances.size() == BALANCE_TYPES) {
+            balance = getWatBalance(WatBalanceType.FLEX1).getValue() +
+                    getWatBalance(WatBalanceType.FLEX2).getValue() +
+                    getWatBalance(WatBalanceType.FLEX3).getValue();
+        }
+        return balance;
+    }
+
+    /**
+     * Returns amount of meal plan funds. If {@code balances} was not properly loaded, it returns 0.
+     * @return amount of funds in meal plan
+     */
+    public double getMealBalance() {
+        double balance = 0;
+
+        if (balances.size() == BALANCE_TYPES) {
+            balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.BEST_BUY_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.FOOD_PLAN).getValue();
+        }
+        return balance;
     }
 
     /**
@@ -342,86 +439,6 @@ public class WatAccount {
                 formattedBegin, formattedEnd);
 
         return getTransactions(url);
-    }
-
-    public WatBalance getWatBalance(WatBalanceType type) {
-        WatBalance balance = null;
-
-        if (balances.size() == BALANCE_TYPES) {
-            switch (type) {
-                case VILLAGE_MEAL:
-                    balance = balances.get(0);
-                    break;
-                case BEST_BUY_MEAL:
-                    balance = balances.get(1);
-                    break;
-                case FOOD_PLAN:
-                    balance = balances.get(2);
-                    break;
-                case FLEX1:
-                    balance = balances.get(3);
-                    break;
-                case FLEX2:
-                    balance = balances.get(4);
-                    break;
-                case FLEX3:
-                    balance = balances.get(5);
-                    break;
-                case TRANSFER:
-                    balance = balances.get(6);
-                    break;
-                case DON_MEAL:
-                    balance = balances.get(7);
-                    break;
-                case DON_FLEX:
-                    balance = balances.get(8);
-                    break;
-                case REWARDS:
-                    balance = balances.get(9);
-                    break;
-                case DEPT_CHARGE:
-                    balance = balances.get(10);
-                    break;
-                case OVERDRAFT:
-                    balance = balances.get(11);
-                    break;
-            }
-        }
-        return balance;
-    }
-
-    public double getWatBalanceValue(WatBalanceType type) {
-        WatBalance balance = getWatBalance(type);
-
-        if (balance == null) {
-            return 0;
-        }
-        else {
-            return balance.getValue();
-        }
-    }
-
-    // Getters for two most popular balance types
-    public double getFlexBalance() {
-        double balance = 0;
-
-        if (balances.size() == BALANCE_TYPES) {
-            balance = getWatBalance(WatBalanceType.FLEX1).getValue() +
-                    getWatBalance(WatBalanceType.FLEX2).getValue() +
-                    getWatBalance(WatBalanceType.FLEX3).getValue();
-        }
-        return balance;
-    }
-
-    public double getMealBalance() {
-        double balance = 0;
-
-        if (balances.size() == BALANCE_TYPES) {
-            balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
-                    getWatBalance(WatBalanceType.BEST_BUY_MEAL).getValue() +
-                    getWatBalance(WatBalanceType.FOOD_PLAN).getValue();
-        }
-        return balance;
     }
 
     // Getters and setters
