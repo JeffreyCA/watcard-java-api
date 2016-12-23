@@ -10,18 +10,14 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class WatSession {
-    private CookieStore cookie_store;
-    private Cookie verification_cookie;
-    private String verification_token;
+    private CookieStore cookieStore;
+    private Cookie verificationCookie;
+    private String verificationToken;
 
     public WatSession() {
         initializeSession();
@@ -31,19 +27,19 @@ public class WatSession {
     private void initializeSession() {
         final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
 
-        cookie_store = new BasicCookieStore();
-        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookie_store).build();
+        cookieStore = new BasicCookieStore();
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
         HttpGet get = new HttpGet(LOGIN_URL);
 
         try {
             HttpResponse response = client.execute(get);
-            String html_response = new BasicResponseHandler().handleResponse(response);
-            Document doc = Jsoup.parse(html_response);
+            String htmlResponse = new BasicResponseHandler().handleResponse(response);
+            Document doc = Jsoup.parse(htmlResponse);
 
             String requestVerificationToken = doc.select("input[name=__RequestVerificationToken]").get(0).val();
             setVerificationToken(requestVerificationToken);
             // Should only be one cookie in request
-            setVerificationCookie(cookie_store.getCookies().get(0));
+            setVerificationCookie(cookieStore.getCookies().get(0));
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -51,21 +47,26 @@ public class WatSession {
     }
 
     public Cookie getVerificationCookie() {
-        return verification_cookie;
+        return verificationCookie;
     }
+
     public void setVerificationCookie(Cookie verification_cookie) {
-        this.verification_cookie = verification_cookie;
+        this.verificationCookie = verification_cookie;
     }
+
     public String getVerificationToken() {
-        return verification_token;
+        return verificationToken;
     }
+
     public void setVerificationToken(String verification_token) {
-        this.verification_token = verification_token;
+        this.verificationToken = verification_token;
     }
+
     public CookieStore getCookieStore() {
-        return cookie_store;
+        return cookieStore;
     }
+
     public void setCookieStore(CookieStore cookie_store) {
-        this.cookie_store = cookie_store;
+        this.cookieStore = cookie_store;
     }
 }
