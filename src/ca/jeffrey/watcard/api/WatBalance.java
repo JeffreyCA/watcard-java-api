@@ -1,15 +1,22 @@
 package ca.jeffrey.watcard.api;
 
-/**
- * Created by Jeffrey on 2016-12-19.
- */
+
 public class WatBalance {
 
+    // Fields
     private String id;
     private String name;
     private double limit;
     private double value;
 
+    /**
+     * Constructor
+     *
+     * @param id account ID
+     * @param name name of account
+     * @param limit limit of account
+     * @param value existing account balance
+     */
     public WatBalance(String id, String name, double limit, double value) {
         this.id = id;
         this.name = name;
@@ -17,6 +24,12 @@ public class WatBalance {
         this.value = value;
     }
 
+    @Override
+    public String toString() {
+        return String.format("%s %s: $%.2f [Limit: $%.2f]", id, name, value, limit);
+    }
+
+    // Getters and setters
     public String getId() {
         return id;
     }
@@ -47,10 +60,5 @@ public class WatBalance {
 
     public void setValue(double value) {
         this.value = value;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s %s: $%.2f [Limit: $%.2f]", id, name, value, limit);
     }
 }
