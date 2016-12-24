@@ -1,4 +1,4 @@
-package ca.jeffrey.watcard.api;
+package ca.jeffrey.watcard;
 
 
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package ca.jeffrey.watcard.api;
+package ca.jeffrey.watcard;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -52,6 +52,20 @@ public class WatAccount {
      */
     public WatAccount(WatSession session, String account, String password) {
         this.session = session;
+        this.account = account;
+        this.password = password.toCharArray();
+        balances = new ArrayList<>();
+        name = birthDate = maritalStatus = sex = email = phone = mobile = address = "";
+    }
+
+    /**
+     * Constructor
+     *
+     * @param account  student id
+     * @param password associated password
+     */
+    public WatAccount(String account, String password) {
+        this.session = new WatSession();
         this.account = account;
         this.password = password.toCharArray();
         balances = new ArrayList<>();
