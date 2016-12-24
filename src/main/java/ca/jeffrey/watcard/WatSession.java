@@ -1,6 +1,5 @@
 package ca.jeffrey.watcard;
 
-import org.apache.http.cookie.Cookie;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
@@ -13,9 +12,8 @@ import java.util.List;
 
 
 public class WatSession {
-    private CookieStore cookieStore;
     private CookieManager cookieManager;
-    private Cookie verificationCookie;
+    private HttpCookie verificationCookie;
     private String verificationToken;
 
     public WatSession() {
@@ -35,20 +33,15 @@ public class WatSession {
             URL url = new URL(LOGIN_URL);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.getContent();
 
-            connection.connect();
-            CookieStore cookieStore = cookieManager.getCookieStore();
-            List cookieList = cookieStore.getCookies();
-            System.out.println("Length: " + cookieList.size());
+            HttpCookie verificationCookie = null;
+
             if (cookieManager.getCookieStore().getCookies().size() > 0) {
                 List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
 
                 if (cookies != null) {
-                    for (HttpCookie cookie : cookies) {
-                        // connection.setRequestProperty("Cookie", cookie.getName() + "=" + cookie.getValue());
-                        System.err.println("Name: " + cookie.getName());
-                        System.err.println("Value: " + cookie.getValue());
-                    }
+                    verificationCookie = cookies.get(0);
                 }
             }
 
@@ -56,6 +49,7 @@ public class WatSession {
             BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
             String line = "";
             StringBuffer buffer = new StringBuffer("");
+
             while ((line = rd.readLine()) != null) {
                 buffer.append(line);
             }
@@ -65,20 +59,18 @@ public class WatSession {
 
             String requestVerificationToken = doc.select("input[name=__RequestVerificationToken]").get(0).val();
             setVerificationToken(requestVerificationToken);
-            // setVerificationCookie(cookieStore.getCookies().get(0));
-            System.out.println(requestVerificationToken);
-            connection.disconnect();
+            setVerificationCookie(verificationCookie);
         }
         catch (IOException ie) {
             ie.printStackTrace();
         }
     }
 
-    public Cookie getVerificationCookie() {
+    public HttpCookie getVerificationCookie() {
         return verificationCookie;
     }
 
-    public void setVerificationCookie(Cookie verification_cookie) {
+    public void setVerificationCookie(HttpCookie verification_cookie) {
         this.verificationCookie = verification_cookie;
     }
 
@@ -90,11 +82,11 @@ public class WatSession {
         this.verificationToken = verification_token;
     }
 
-    public CookieStore getCookieStore() {
-        return cookieStore;
+    public CookieManager getCookieManager() {
+        return cookieManager;
     }
 
-    public void setCookieStore(CookieStore cookie_store) {
-        this.cookieStore = cookie_store;
+    public void setCookieManager(CookieManager cookieManager) {
+        this.cookieManager = cookieManager;
     }
 }
