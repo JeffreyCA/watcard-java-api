@@ -1,6 +1,5 @@
 # WatCard Java API
 A Java library for retrieving UWaterloo WatCard data from the web (https://watcard.uwaterloo.ca)
-[ ![Download](https://api.bintray.com/packages/jeffreyca/maven/watcard-java-api/images/download.svg) ](https://bintray.com/jeffreyca/maven/watcard-java-api/_latestVersion)
 
 ## Setup
 
@@ -17,6 +16,8 @@ If you use Maven to manage your dependencies, `watcard-java-api` is posted on Ma
 ```
 
 Or using Gradle:
+
+[ ![Download](https://api.bintray.com/packages/jeffreyca/maven/watcard-java-api/images/download.svg) ](https://bintray.com/jeffreyca/maven/watcard-java-api/_latestVersion)
 
 ```
 repositories {
