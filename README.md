@@ -8,7 +8,6 @@ Download the [latest .jar](https://github.com/JeffreyCA/watcard-java-api/release
 
 If you use Maven to manage your dependencies, `watcard-java-api` is posted on Maven Central:
 
-Java
 ```xml
 <dependency>
   <groupId>ca.jeffrey.watcard</groupId>
@@ -19,7 +18,6 @@ Java
 
 Or using Gradle:
 
-Java
 ```
 repositories {
     jCenter()
