@@ -364,7 +364,7 @@ public class WatAccount {
     /**
      * Returns a list of transactions from a given date to now.
      *
-     * @param begin starting date & time
+     * @param begin starting date &amp; time
      * @return list of WatTransactions completed from {@code now} to now
      */
     public List<WatTransaction> getTransactions(LocalDateTime begin) {
@@ -380,7 +380,7 @@ public class WatAccount {
      * Returns a list of transactions from a given date to now, containing only the last {@code quantity}
      * transactions.
      *
-     * @param begin    starting date & time
+     * @param begin    starting date &amp; time
      * @param quantity number of transactions to display
      * @return List of the latest {@code quantity} WatTransaction from {@code begin} to now
      */
@@ -396,8 +396,8 @@ public class WatAccount {
     /**
      * Returns a list of all transactions completed between two dates.
      *
-     * @param begin starting date & time
-     * @param end   ending date & time
+     * @param begin starting date &amp; time
+     * @param end   ending date &amp; time
      * @return List of all WatTransaction completed between {@code begin} and {@code end}
      */
     public List<WatTransaction> getTransactions(LocalDateTime begin, LocalDateTime end) {
@@ -413,8 +413,8 @@ public class WatAccount {
      * Returns a list of all transactions completed between two dates, containing only the last {@code quantity}
      * transactions.
      *
-     * @param begin    starting date & time
-     * @param end      ending date & time
+     * @param begin    starting date &amp; time
+     * @param end      ending date &amp; time
      * @param quantity number of transactions to display
      * @return List of the latest {@code quantity} WatTransaction from {@code begin} to {@code end}
      */
