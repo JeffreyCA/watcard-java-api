@@ -1,21 +1,20 @@
 package ca.jeffrey.watcard;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.CookieStore;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.impl.client.BasicCookieStore;
-import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.*;
+import java.util.List;
 
 
 public class WatSession {
     private CookieStore cookieStore;
+    private CookieManager cookieManager;
     private Cookie verificationCookie;
     private String verificationToken;
 
@@ -27,19 +26,48 @@ public class WatSession {
     private void initializeSession() {
         final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
 
-        cookieStore = new BasicCookieStore();
-        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(cookieStore).build();
-        HttpGet get = new HttpGet(LOGIN_URL);
+        // cookieStore = new BasicCookieStore();
+        cookieManager = new CookieManager();
+        CookieHandler.setDefault(cookieManager);
+        cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
 
         try {
-            HttpResponse response = client.execute(get);
-            String htmlResponse = new BasicResponseHandler().handleResponse(response);
+            URL url = new URL(LOGIN_URL);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+
+            connection.connect();
+            CookieStore cookieStore = cookieManager.getCookieStore();
+            List cookieList = cookieStore.getCookies();
+            System.out.println("Length: " + cookieList.size());
+            if (cookieManager.getCookieStore().getCookies().size() > 0) {
+                List<HttpCookie> cookies = cookieManager.getCookieStore().getCookies();
+
+                if (cookies != null) {
+                    for (HttpCookie cookie : cookies) {
+                        // connection.setRequestProperty("Cookie", cookie.getName() + "=" + cookie.getValue());
+                        System.err.println("Name: " + cookie.getName());
+                        System.err.println("Value: " + cookie.getValue());
+                    }
+                }
+            }
+
+            InputStream inputStream = connection.getInputStream();
+            BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
+            String line = "";
+            StringBuffer buffer = new StringBuffer("");
+            while ((line = rd.readLine()) != null) {
+                buffer.append(line);
+            }
+
+            String htmlResponse = buffer.toString();
             Document doc = Jsoup.parse(htmlResponse);
 
             String requestVerificationToken = doc.select("input[name=__RequestVerificationToken]").get(0).val();
             setVerificationToken(requestVerificationToken);
-            // Should only be one cookie in request
-            setVerificationCookie(cookieStore.getCookies().get(0));
+            // setVerificationCookie(cookieStore.getCookies().get(0));
+            System.out.println(requestVerificationToken);
+            connection.disconnect();
         }
         catch (IOException ie) {
             ie.printStackTrace();
