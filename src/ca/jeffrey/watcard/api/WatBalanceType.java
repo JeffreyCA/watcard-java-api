@@ -1,5 +1,0 @@
-package ca.jeffrey.watcard.api;
-
-public enum WatBalanceType {
-    VILLAGE_MEAL, BEST_BUY_MEAL, FOOD_PLAN, FLEX1, FLEX2, FLEX3, TRANSFER, DON_MEAL, DON_FLEX, REWARDS, DEPT_CHARGE, OVERDRAFT
-}
