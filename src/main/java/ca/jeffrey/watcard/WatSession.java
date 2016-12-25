@@ -12,6 +12,7 @@ import java.net.*;
 
 
 public class WatSession {
+
     private CookieManager cookieManager;
     private HttpCookie verificationCookie;
     private String verificationToken;
@@ -60,5 +61,9 @@ public class WatSession {
 
     public void setVerificationToken(String verification_token) {
         this.verificationToken = verification_token;
+    }
+
+    public CookieManager getCookieManager() {
+        return cookieManager;
     }
 }

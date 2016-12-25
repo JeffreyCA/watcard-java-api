@@ -4,17 +4,16 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.threeten.bp.LocalDateTime;
+import org.threeten.bp.format.DateTimeFormatter;
+import org.threeten.bp.temporal.ChronoUnit;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
+import java.net.*;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -194,6 +193,9 @@ public class WatAccount {
         final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Financial/Balances";
         // Initialize list
         balances = new ArrayList<>();
+
+        CookieManager cookieManager = session.getCookieManager();
+        CookieHandler.setDefault(cookieManager);
 
         try {
             URL url = new URL(BALANCE_URL);
