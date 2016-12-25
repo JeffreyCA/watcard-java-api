@@ -32,6 +32,7 @@ public class WatAccount {
     private String account;
     private char[] password;
     private List<WatBalance> balances;
+    private double total;
 
     // Personal information fields
     private String name;
@@ -56,6 +57,7 @@ public class WatAccount {
         this.account = account;
         this.password = password.toCharArray();
         balances = new ArrayList<>();
+        total = 0;
         name = birthDate = maritalStatus = sex = email = phone = mobile = address = photo = "";
     }
 
@@ -70,6 +72,7 @@ public class WatAccount {
         this.account = account;
         this.password = password.toCharArray();
         balances = new ArrayList<>();
+        total = 0;
         name = birthDate = maritalStatus = sex = email = phone = mobile = address = photo = "";
     }
 
@@ -198,6 +201,9 @@ public class WatAccount {
                 // Add WatBalance to list
                 balances.add(new WatBalance(id, name, limit, value));
             }
+
+            String totalString = doc.select("span.pull-right").text().replace("Total: $", "");
+            total = Double.valueOf(totalString);
         }
         catch (IOException ie) {
             ie.printStackTrace();
