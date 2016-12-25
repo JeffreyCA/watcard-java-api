@@ -6,7 +6,7 @@
     <groupId>ca.jeffrey.watcard</groupId>
     <artifactId>watcard-java-api</artifactId>
     <packaging>jar</packaging>
-    <version>1.0</version>
+    <version>1.0a</version>
     <name>WatCard Java API</name>
     <url>http://bintray.com</url>
 	
@@ -78,6 +78,7 @@
 			<plugin>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-source-plugin</artifactId>
+            <version>3.0.1</version>
 			<executions>
 				<execution>
 					<id>attach-sources</id>
