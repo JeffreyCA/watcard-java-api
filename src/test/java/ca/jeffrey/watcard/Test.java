@@ -7,5 +7,6 @@ public class Test {
         account.login();
         account.loadBalances();
         account.displayBalances();
+        account.loadPersonalInfo();
     }
 }
