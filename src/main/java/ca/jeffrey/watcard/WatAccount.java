@@ -30,6 +30,7 @@ public class WatAccount {
     private String account;
     private char[] password;
     private List<WatBalance> balances;
+
     private double total;
 
     // Personal information fields
