@@ -232,7 +232,9 @@ public class WatAccount {
                 // Add WatBalance to list
                 balances.add(new WatBalance(id, name, limit, value));
             }
-            total = 0;
+
+            String totalString = doc.select("span.pull-right").text().replace("Total: $", "");
+            total = Double.valueOf(totalString);
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -352,6 +354,24 @@ public class WatAccount {
             balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
                     getWatBalance(WatBalanceType.BEST_BUY_MEAL).getValue() +
                     getWatBalance(WatBalanceType.FOOD_PLAN).getValue();
+        }
+        return balance;
+    }
+
+    /**
+     * Returns amount of other funds. If {@code balances} was not properly loaded, it returns 0.
+     * @return amount of other funds
+     */
+    public double getOtherBalance() {
+        double balance = 0;
+
+        if (balances.size() == BALANCE_TYPES) {
+            balance = getWatBalance(WatBalanceType.TRANSFER).getValue() +
+                    getWatBalance(WatBalanceType.DON_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.DON_FLEX).getValue() +
+                    getWatBalance(WatBalanceType.REWARDS).getValue() +
+                    getWatBalance(WatBalanceType.DEPT_CHARGE).getValue() +
+                    getWatBalance(WatBalanceType.OVERDRAFT).getValue();
         }
         return balance;
     }
@@ -539,6 +559,14 @@ public class WatAccount {
 
     public void setBalances(List<WatBalance> balances) {
         this.balances = balances;
+    }
+
+    public double getTotalBalance() {
+        return total;
+    }
+
+    public void setTotalBalance(double total) {
+        this.total = total;
     }
 
     public String getName() {
