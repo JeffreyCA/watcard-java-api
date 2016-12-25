@@ -6,7 +6,7 @@
     <groupId>ca.jeffrey.watcard</groupId>
     <artifactId>watcard-java-api</artifactId>
     <packaging>jar</packaging>
-    <version>1.0a</version>
+    <version>1.0b</version>
     <name>WatCard Java API</name>
     <url>http://bintray.com</url>
 	
@@ -37,21 +37,6 @@
 	</scm>
 	
     <dependencies>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.4.4</version>
-        </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
