@@ -6,7 +6,7 @@
     <groupId>ca.jeffrey.watcard</groupId>
     <artifactId>watcard-java-api</artifactId>
     <packaging>jar</packaging>
-    <version>1.0b</version>
+    <version>1.0c</version>
     <name>WatCard Java API</name>
     <url>http://bintray.com</url>
 	
