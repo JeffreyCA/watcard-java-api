@@ -32,6 +32,7 @@ public class WatAccount {
     private String account;
     private char[] password;
     private List<WatBalance> balances;
+
     private double total;
 
     // Personal information fields
@@ -328,6 +329,24 @@ public class WatAccount {
     }
 
     /**
+     * Returns amount of other funds. If {@code balances} was not properly loaded, it returns 0.
+     * @return amount of other funds
+     */
+    public double getOtherBalance() {
+        double balance = 0;
+
+        if (balances.size() == BALANCE_TYPES) {
+            balance = getWatBalance(WatBalanceType.TRANSFER).getValue() +
+                    getWatBalance(WatBalanceType.DON_MEAL).getValue() +
+                    getWatBalance(WatBalanceType.DON_FLEX).getValue() +
+                    getWatBalance(WatBalanceType.REWARDS).getValue() +
+                    getWatBalance(WatBalanceType.DEPT_CHARGE).getValue() +
+                    getWatBalance(WatBalanceType.OVERDRAFT).getValue();
+        }
+        return balance;
+    }
+
+    /**
      * Returns a list of transactions from the given url.
      *
      * @param url request URL
@@ -498,6 +517,14 @@ public class WatAccount {
 
     public void setBalances(List<WatBalance> balances) {
         this.balances = balances;
+    }
+
+    public double getTotalBalance() {
+        return total;
+    }
+
+    public void setTotalBalance(double total) {
+        this.total = total;
     }
 
     public String getName() {
