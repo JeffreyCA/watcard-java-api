@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compile 'ca.jeffrey.watcard.watcard-java-api:1.1'
+    compile 'ca.jeffrey.watcard:watcard-java-api:1.1'
 }
 ```
 
