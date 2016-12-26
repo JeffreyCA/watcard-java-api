@@ -6,8 +6,8 @@ public class WatBalance {
     // Fields
     private String id;
     private String name;
-    private double limit;
-    private double value;
+    private float limit;
+    private float value;
 
     /**
      * Constructor
@@ -17,7 +17,7 @@ public class WatBalance {
      * @param limit limit of balance type
      * @param value balance
      */
-    public WatBalance(String id, String name, double limit, double value) {
+    public WatBalance(String id, String name, float limit, float value) {
         this.id = id;
         this.name = name;
         this.limit = limit;
@@ -46,19 +46,19 @@ public class WatBalance {
         this.name = name;
     }
 
-    public double getLimit() {
+    public float getLimit() {
         return limit;
     }
 
-    public void setLimit(double limit) {
+    public void setLimit(float limit) {
         this.limit = limit;
     }
 
-    public double getValue() {
+    public float getValue() {
         return value;
     }
 
-    public void setValue(double value) {
+    public void setValue(float value) {
         this.value = value;
     }
 }

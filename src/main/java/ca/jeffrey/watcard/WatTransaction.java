@@ -4,7 +4,11 @@ package ca.jeffrey.watcard;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class WatTransaction {
+import java.io.Serializable;
+import java.text.NumberFormat;
+import java.util.Locale;
+
+public class WatTransaction implements Serializable {
 
     // Date format to be passed in URL
     protected static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd+HH:mm:ss");
@@ -13,11 +17,12 @@ public class WatTransaction {
 
     // Fields
     private LocalDateTime dateTime;
-    private double amount;
+    private float amount;
     private String account;
     private int unit;
     private String type;
     private String terminal;
+	private boolean flex;
 
     /**
      * Constructor
@@ -29,13 +34,14 @@ public class WatTransaction {
      * @param type type of transaction
      * @param terminal location of transaction
      */
-    public WatTransaction(LocalDateTime dateTime, double amount, String account, int unit, String type, String terminal) {
+    public WatTransaction(LocalDateTime dateTime, float amount, String account, int unit, String type, String terminal) {
         this.dateTime = dateTime;
         this.amount = amount;
         this.account = account;
         this.unit = unit;
         this.type = type;
         this.terminal = terminal;
+		flex = !terminal.contains("WAT-FS");
     }
 
     @Override
@@ -49,15 +55,30 @@ public class WatTransaction {
         return dateTime;
     }
 
+    // Formatted time
+    public String getTimeString() {
+        DateTimeFormatter myFormat = DateTimeFormatter.ofPattern("dd MMM 'at' h:mm a");
+        return myFormat.format(dateTime);
+    }
+
+    public boolean isFlex() {
+        return flex;
+    }
+
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
-    public double getAmount() {
+    public float getAmount() {
         return amount;
     }
 
-    public void setAmount(double amount) {
+    // Formatted amount
+    public String getAmountString() {
+        return NumberFormat.getCurrencyInstance(Locale.CANADA).format(amount);
+    }
+
+    public void setAmount(float amount) {
         this.amount = amount;
     }
 
@@ -87,6 +108,10 @@ public class WatTransaction {
 
     public String getTerminal() {
         return terminal;
+    }
+
+    public String getCleanTerminal() {
+        return terminal.replace("WAT-FS-", "").split(" : ")[1];
     }
 
     public void setTerminal(String terminal) {
