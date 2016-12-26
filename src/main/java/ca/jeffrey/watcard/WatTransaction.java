@@ -61,6 +61,15 @@ public class WatTransaction implements Serializable {
         return myFormat.format(dateTime);
     }
 
+	public String getAccountTypeString() {
+		if (flex) {
+			return "Flex Dollars";
+		}
+		else {
+			return "Meal Plan";
+		}
+	}
+	
     public boolean isFlex() {
         return flex;
     }
