@@ -31,7 +31,7 @@ public class WatAccount {
     private char[] password;
     private List<WatBalance> balances;
 
-    private double total;
+    private float total;
 
     // Personal information fields
     private String name;
@@ -230,14 +230,14 @@ public class WatAccount {
                 String id = info.get(0).text();
                 String name = info.get(1).text();
                 // Remove $ character
-                double limit = Double.parseDouble(info.get(2).text().replace("$", ""));
-                double value = Double.parseDouble(info.get(3).text().replace("$", ""));
+                float limit = Float.parseFloat(info.get(2).text().replace("$", ""));
+                float value = Float.parseFloat(info.get(3).text().replace("$", ""));
                 // Add WatBalance to list
                 balances.add(new WatBalance(id, name, limit, value));
             }
 
             String totalString = doc.select("span.pull-right").text().replace("Total: $", "");
-            total = Double.valueOf(totalString);
+            total = Float.valueOf(totalString);
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -318,7 +318,7 @@ public class WatAccount {
      * @param type balance type
      * @return amount in the {@code type} balance
      */
-    public double getWatBalanceValue(WatBalanceType type) {
+    public float getWatBalanceValue(WatBalanceType type) {
         WatBalance balance = getWatBalance(type);
 
         if (balance == null) {
@@ -335,8 +335,8 @@ public class WatAccount {
      *
      * @return amount of Flex Dollars
      */
-    public double getFlexBalance() {
-        double balance = 0;
+    public float getFlexBalance() {
+        float balance = 0;
 
         if (balances.size() == BALANCE_TYPES) {
             balance = getWatBalance(WatBalanceType.FLEX1).getValue() +
@@ -350,8 +350,8 @@ public class WatAccount {
      * Returns amount of meal plan funds. If {@code balances} was not properly loaded, it returns 0.
      * @return amount of funds in meal plan
      */
-    public double getMealBalance() {
-        double balance = 0;
+    public float getMealBalance() {
+        float balance = 0;
 
         if (balances.size() == BALANCE_TYPES) {
             balance = getWatBalance(WatBalanceType.VILLAGE_MEAL).getValue() +
@@ -365,8 +365,8 @@ public class WatAccount {
      * Returns amount of other funds. If {@code balances} was not properly loaded, it returns 0.
      * @return amount of other funds
      */
-    public double getOtherBalance() {
-        double balance = 0;
+    public float getOtherBalance() {
+        float balance = 0;
 
         if (balances.size() == BALANCE_TYPES) {
             balance = getWatBalance(WatBalanceType.TRANSFER).getValue() +
@@ -425,7 +425,7 @@ public class WatAccount {
                     Elements data = transaction.select("td");
                     // Store selected data in corresponding fields
                     LocalDateTime dateTime = LocalDateTime.parse(data.get(0).text(), RESPONSE_FORMAT);
-                    double amount = Double.valueOf(data.get(1).text().replace("$", ""));
+                    float amount = Float.valueOf(data.get(1).text().replace("$", ""));
                     String account = data.get(2).text();
                     int unit = Integer.valueOf(data.get(3).text());
                     String type = data.get(4).text();
@@ -564,11 +564,11 @@ public class WatAccount {
         this.balances = balances;
     }
 
-    public double getTotalBalance() {
+    public float getTotalBalance() {
         return total;
     }
 
-    public void setTotalBalance(double total) {
+    public void setTotalBalance(float total) {
         this.total = total;
     }
 
