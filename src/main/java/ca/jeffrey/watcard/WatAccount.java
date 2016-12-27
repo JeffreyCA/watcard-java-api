@@ -1,23 +1,25 @@
 package ca.jeffrey.watcard;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 
 public class WatAccount {
@@ -42,6 +44,7 @@ public class WatAccount {
     private String phone;
     private String mobile;
     private String address;
+    private String photo;
 
     /**
      * Constructor
@@ -56,7 +59,7 @@ public class WatAccount {
         this.password = password.toCharArray();
         balances = new ArrayList<>();
         total = 0;
-        name = birthDate = maritalStatus = sex = email = phone = mobile = address = "";
+        name = birthDate = maritalStatus = sex = email = phone = mobile = address = photo = "";
     }
 
     /**
@@ -71,7 +74,7 @@ public class WatAccount {
         this.password = password.toCharArray();
         balances = new ArrayList<>();
         total = 0;
-        name = birthDate = maritalStatus = sex = email = phone = mobile = address = "";
+        name = birthDate = maritalStatus = sex = email = phone = mobile = address = photo = "";
     }
 
     /**
@@ -93,37 +96,21 @@ public class WatAccount {
         // Default code
         int code = -1;
 
-        Map<String, String> params = new LinkedHashMap<>();
-        params.put("__RequestVerificationToken", session.getVerificationToken());
-        params.put("AccountMode", "0"); // default value
-        params.put("Account", account);
-        params.put("Password", new String(password));
+        // Set cookie store
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpPost post = new HttpPost(LOGIN_URL);
 
+        // Parameters to send
+        List<NameValuePair> urlParameters = new ArrayList<>();
+        urlParameters.add(new BasicNameValuePair("__RequestVerificationToken", session.getVerificationToken()));
+        urlParameters.add(new BasicNameValuePair("AccountMode", "0")); // default value
+        urlParameters.add(new BasicNameValuePair("Account", account));
+        urlParameters.add(new BasicNameValuePair("Password", new String(password)));
 
         try {
-            URL url = new URL(LOGIN_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(15000);
-            connection.setRequestMethod("POST");
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-
-            StringBuilder postData = new StringBuilder();
-            for (Map.Entry<String, String> param : params.entrySet()) {
-                if (postData.length() != 0)
-                    postData.append('&');
-
-                postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-                postData.append('=');
-                postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-            }
-
-            byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-            connection.getOutputStream().write(postDataBytes);
-            // connection.connect();
-            code = connection.getResponseCode();
+            post.setEntity(new UrlEncodedFormEntity(urlParameters));
+            HttpResponse response = client.execute(post);
+            code = response.getStatusLine().getStatusCode();
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -142,30 +129,18 @@ public class WatAccount {
      * Retrieves user's account information stores it in {@code WatAccount} fields.
      */
     public void loadPersonalInfo() {
-        // Request URL
-        final String BALANCE_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/Personal";
+
+        final String BASE_URL = "https://watcard.uwaterloo.ca";
+        final String PERSONAL_URL = BASE_URL+ "/OneWeb/Account/Personal";
+
+        // Use session's cookie store
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(PERSONAL_URL);
 
         try {
-            URL url = new URL(BALANCE_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(15000);
-            connection.setRequestMethod("GET");
-
-            connection.getContent();
-
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
-            String line = "";
-            StringBuffer buffer = new StringBuffer("");
-
-            while ((line = rd.readLine()) != null) {
-                buffer.append(line);
-            }
-
-            String htmlResponse = buffer.toString();
-
+            // Perform request
+            HttpResponse response = client.execute(get);
+            String htmlResponse = new BasicResponseHandler().handleResponse(response);
             Document doc = Jsoup.parse(htmlResponse);
             Elements info = doc.getElementsByClass("ow-info-container").first()
                     .select("span.ow-value");
@@ -179,6 +154,14 @@ public class WatAccount {
             phone = info.get(6).text().replaceAll("[-().\\s]", ""); // Remove all formatting
             mobile = info.get(7).text().replaceAll("[-().\\s]", "");
             address = info.get(8).text();
+
+            // Get photo URL
+            Element jpg = doc.select(".ow-id-container.hidden-xs").first().select("[data-original]").
+                    first();
+            photo = BASE_URL + jpg.attr("data-original");
+
+            if (photo.equals(BASE_URL))
+                photo = "";
         }
         catch (IOException ie) {
             ie.printStackTrace();
@@ -202,30 +185,14 @@ public class WatAccount {
         // Initialize list
         balances = new ArrayList<>();
 
-        CookieManager cookieManager = session.getCookieManager();
-        CookieHandler.setDefault(cookieManager);
+        // Use session's cookie store
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(BALANCE_URL);
 
         try {
-            URL url = new URL(BALANCE_URL);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(15000);
-            connection.setRequestMethod("GET");
-
-            connection.getContent();
-
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
-            String line = "";
-            StringBuffer buffer = new StringBuffer("");
-
-            while ((line = rd.readLine()) != null) {
-                buffer.append(line);
-            }
-
-            String htmlResponse = buffer.toString();
-
+            // Perform request
+            HttpResponse response = client.execute(get);
+            String htmlResponse = new BasicResponseHandler().handleResponse(response);
             Document doc = Jsoup.parse(htmlResponse);
             // Select rows in the balance table
             Elements accounts = doc.getElementsByClass("table table-striped ow-table-responsive").first()
@@ -397,29 +364,17 @@ public class WatAccount {
         // Note: This format is different from the DateTime format that is passed in the url itself
         final DateTimeFormatter RESPONSE_FORMAT = DateTimeFormatter.ofPattern("MM/dd/yyyy h:mm:ss a");
 
+        // Use session's cookie store
+        HttpClient client = HttpClientBuilder.create().setDefaultCookieStore(session.getCookieStore()).build();
+        HttpGet get = new HttpGet(url);
+
         // Initialize list
         List<WatTransaction> transactions = new ArrayList<>();
 
         try {
-            URL url_ = new URL(url);
-            HttpURLConnection connection = (HttpURLConnection) url_.openConnection();
-
-            connection.setReadTimeout(10000);
-            connection.setConnectTimeout(15000);
-            connection.setRequestMethod("GET");
-
-            connection.getContent();
-
-            InputStream inputStream = connection.getInputStream();
-            BufferedReader rd = new BufferedReader(new InputStreamReader(inputStream));
-            String line = "";
-            StringBuffer buffer = new StringBuffer("");
-
-            while ((line = rd.readLine()) != null) {
-                buffer.append(line);
-            }
-
-            String htmlResponse = buffer.toString();
+            // Perform request
+            HttpResponse response = client.execute(get);
+            String htmlResponse = new BasicResponseHandler().handleResponse(response);
 
             if (!htmlResponse.contains("No transactions found!")) {
                 Document doc = Jsoup.parse(htmlResponse);
@@ -641,5 +596,13 @@ public class WatAccount {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(String photo) {
+        this.photo = photo;
     }
 }
