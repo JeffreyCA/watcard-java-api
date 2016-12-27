@@ -34,7 +34,91 @@ dependencies {
 ```
 
 ## Usage
+#### Initialization
+Create an account:
 
+```
+WatAccount account = new WatAccount("<student id>", "<pin>");
+```
+
+Create login request:
+```
+account.login();
+```
+
+Refresh session:
+```
+account.newSession();
+```
+
+#### Personal information
+Load personal data:
+```
+account.loadPersonalInfo();
+```
+
+Get name stored on WatCard account:
+```
+String name = account.getName();
+```
+
+Get photo URL:
+```
+String photoUrl = account.getPhoto();
+```
+
+#### Balance Data
+Load balance data:
+```
+account.loadBalances();
+```
+
+Get flex & meal plan balances:
+```
+float meal = account.getMealBalance();
+float flex = account.getFlexBalance();
+```
+
+Get specific account balance:
+```
+float donMeal = account.getWatBalance(WatBalanceType.DON_MEAL).getValue();
+```
+
+Output all balance information:
+```
+account.displayBalances();
+```
+#### Transaction Data
+Retrieve all transactions (from newest to oldest) since a particular `LocalDateTime`:
+```
+LocalDateTime date = LocalDateTime.of(2016, 10, 1, 0, 0); // Oct. 1, 2016 at 00:00
+List<WatTransaction> transactions = account.getTransactions(date);
+```
+
+Retrieve only a certain number of transactions (from newest to oldest) since a particular `LocalDateTime`:
+```
+LocalDateTime date = LocalDateTime.of(2016, 10, 1, 0, 0);
+// Retrieve 50 latest transactions up until date
+List<WatTransaction> transactions = account.getTransactions(date, 50);
+```
+
+Retrieve all transactions between two `LocalDateTime`:
+```
+LocalDateTime date1 = LocalDateTime.of(2016, 10, 1, 0, 0); // Oct. 1, 2016 at 00:00
+LocalDateTime date2 = LocalDateTime.of(2016, 12, 25, 11, 59); // Dec. 25, 2016 at 11:59
+
+List<WatTransaction> transactions = account.getTransactions(date1, date2);
+```
+
+Retrieve all transactions within the last `n` days:
+
+*The true flag means that if "now" is December 25, 2016 09:00, then it retrieves all transactions up until `date` at 09:00.
+If the flag was switched to false, it retrieves all transactions from now until `date` 00:00.*
+```
+List<WatTransaction> transactions = account.getLastDaysTransactions(n, true);
+```
+## Other Resources
 Read the javadoc [here](https://jeffreyca.github.io/watcard-java-api/).
 
-Examples will be posted here soon.
+## Contributing
+I welcome any improvements and changes!
