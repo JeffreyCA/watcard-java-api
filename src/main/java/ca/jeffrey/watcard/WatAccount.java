@@ -85,9 +85,9 @@ public class WatAccount {
      * Logs user into WatCard site by initiating a POST request containing a {@code __RequestVerificationToken} and user
      * account details. Uses a {@code WatSession} to store cookies and verification token.
      *
-     * @return Response of POST request, or -1 if there was an IOException
+     * @return true if login is successful, otherwise it throws an exception.
      */
-    public int login() {
+    public boolean login() {
         // Request URL
         final String LOGIN_URL = "https://watcard.uwaterloo.ca/OneWeb/Account/LogOn";
         // Default code
@@ -128,7 +128,14 @@ public class WatAccount {
         catch (IOException ie) {
             ie.printStackTrace();
         }
-        return code;
+
+        if (code == -1  || code == 200) {
+            throw new IllegalArgumentException("Authentication error.");
+        }
+
+        // Code 302 should be correct response
+
+        return true;
     }
 
     /**
