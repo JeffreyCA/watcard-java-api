@@ -34,7 +34,7 @@ dependencies {
 ```
 
 ## Usage
-#### Initialization
+### Initialization
 Create an account:
 
 ```
@@ -51,7 +51,7 @@ Refresh session:
 account.newSession();
 ```
 
-#### Personal information
+### Personal information
 Load personal data:
 ```
 account.loadPersonalInfo();
@@ -67,7 +67,7 @@ Get photo URL:
 String photoUrl = account.getPhoto();
 ```
 
-#### Balance Data
+### Balance Data
 Load balance data:
 ```
 account.loadBalances();
@@ -88,7 +88,7 @@ Output all balance information:
 ```
 account.displayBalances();
 ```
-#### Transaction Data
+### Transaction Data
 Retrieve all transactions (from newest to oldest) since a particular `LocalDateTime`:
 ```
 LocalDateTime date = LocalDateTime.of(2016, 10, 1, 0, 0); // Oct. 1, 2016 at 00:00
@@ -121,4 +121,4 @@ List<WatTransaction> transactions = account.getLastDaysTransactions(n, true);
 Read the javadoc [here](https://jeffreyca.github.io/watcard-java-api/).
 
 ## Contributing
-I welcome any improvements and changes!
+Improvements and changes are welcome!
