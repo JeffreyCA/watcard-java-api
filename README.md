@@ -43,7 +43,12 @@ WatAccount account = new WatAccount("<student id>", "<pin>");
 
 Create login request:
 ```java
-account.login();
+try {
+    account.login();
+}
+catch (IllegalArgumentException e) {
+    // Handle invalid login information
+}
 ```
 
 Refresh session:
