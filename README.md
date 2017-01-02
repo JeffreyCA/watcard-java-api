@@ -17,7 +17,7 @@ Secondly, if you are using Maven to manage your project, `watcard-java-api` is a
 <dependency>
   <groupId>ca.jeffrey.watcard</groupId>
   <artifactId>watcard-java-api</artifactId>
-  <version>1.2</version>
+  <version>1.4</version>
 </dependency>
 ```
 
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    compile 'ca.jeffrey.watcard:watcard-java-api:1.2'
+    compile 'ca.jeffrey.watcard:watcard-java-api:1.4'
 }
 ```
 
