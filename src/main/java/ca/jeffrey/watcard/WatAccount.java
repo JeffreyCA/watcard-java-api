@@ -204,13 +204,13 @@ public class WatAccount {
                 String id = info.get(0).text();
                 String name = info.get(1).text();
                 // Remove $ character
-                float limit = Float.parseFloat(info.get(2).text().replace("$", ""));
-                float value = Float.parseFloat(info.get(3).text().replace("$", ""));
+                float limit = Float.parseFloat(info.get(2).text().replaceAll("[$,]", ""));
+                float value = Float.parseFloat(info.get(3).text().replaceAll("[$,]", ""));
                 // Add WatBalance to list
                 balances.add(new WatBalance(id, name, limit, value));
             }
 
-            String totalString = doc.select("span.pull-right").text().replace("Total: $", "");
+            String totalString = doc.select("span.pull-right").text().replaceAll("[[A-Z][a-z]$,:]", "");
             total = Float.valueOf(totalString);
         }
         catch (IOException ie) {
@@ -387,7 +387,7 @@ public class WatAccount {
                     Elements data = transaction.select("td");
                     // Store selected data in corresponding fields
                     LocalDateTime dateTime = LocalDateTime.parse(data.get(0).text(), RESPONSE_FORMAT);
-                    float amount = Float.valueOf(data.get(1).text().replace("$", ""));
+                    float amount = Float.valueOf(data.get(1).text().replaceAll("[$,]", ""));
                     String account = data.get(2).text();
                     int unit = Integer.valueOf(data.get(3).text());
                     String type = data.get(4).text();
