@@ -1,5 +1,6 @@
 package ca.jeffrey.watcard;
 
+import java.util.Locale;
 
 public class WatBalance {
 
@@ -26,7 +27,7 @@ public class WatBalance {
 
     @Override
     public String toString() {
-        return String.format("%s %s: $%.2f [Limit: $%.2f]", id, name, value, limit);
+        return String.format(Locale.CANADA, "%s %s: $%.2f [Limit: $%.2f]", id, name, value, limit);
     }
 
     // Getters and setters
